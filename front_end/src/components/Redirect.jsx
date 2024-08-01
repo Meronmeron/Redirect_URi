@@ -35,7 +35,7 @@ const Redirect = () => {
       {responseData ? (
         <div className="text-center">
           <h3 className="text-3xl mb-4">Welcome</h3>
-          {/* <TikTokCreatorInfo accessToken={accessToken}/> */}
+          <TikTokCreatorInfo accessToken={accessToken}/>
           
           <button className="bg-razzmatazz text-white mt-2 py-2 px-4 rounded-lg shadow-lg hover:bg-splash transition-colors">Create</button>
         </div>
