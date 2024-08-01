@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import TikTokCreatorInfo from './TiktokCreatorInfo';
 import EditorPage from './EditorPage';
+
 // import { Link } from 'react-router-dom';
 
 const Redirect = () => {
@@ -14,7 +15,7 @@ const Redirect = () => {
     const code = urlSearchParams.get('code');
 
     // Handle potential axios errors
-    axios.post("http://localhost:4000/tiktokaccesstoken", {
+    axios.post("https://redirect-ur.onrender.com/tiktokaccesstoken", {
       code,
     })
       .then((response) => {

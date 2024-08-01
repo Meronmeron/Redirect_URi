@@ -1,6 +1,9 @@
 import React, { useContext,useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import '../index.css'
+import {toast,ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const EditorPage = ({accessToken}) => {
   
   const [outputFilePath, setOutputFilePath] = useState('');
@@ -83,7 +86,7 @@ const EditorPage = ({accessToken}) => {
     setLoading(true);
     const formData = new FormData(event.target);
     try {
-      const response = await fetch('http://localhost:4000/api/upload', {
+      const response = await fetch('https://redirect-ur.onrender.com/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -126,13 +129,18 @@ const EditorPage = ({accessToken}) => {
       const file = new File([outputFilePath], 'editedVideo.mp4', { type: 'video/mp4' });
       const formData = new FormData();
       formData.append('video_file', file);
-      const postResponse = await axios.post('http://localhost:4000/api/post', formData, {
+      const postResponse = await axios.post('https://redirect-ur.onrender.com/api/post', formData, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
       });
 
       console.log(postResponse.data);
+      if (postResponse.data.message === "Video uploaded successfully"){
+          toast.success("Video uploaded successfully")
+        }else{
+            toast.error("failes to upload video")
+        }
     } catch (error) {
       console.error('Error posting video:', error);
     }
@@ -222,7 +230,7 @@ const EditorPage = ({accessToken}) => {
         <canvas id='previewCanvas' ref={canvasRef} className="border border-gray-300 rounded"></canvas>
        </div>
       </div>
-      
+      <ToastContainer/>
     </div>
 
   );
