@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import TikTokCreatorInfo from './TiktokCreatorInfo';
-// import EditorPage from './EditorPage';
+import EditorPage from './EditorPage';
 // import { Link } from 'react-router-dom';
 
 const Redirect = () => {
   const [responseData, setResponseData] = useState(null);
   const [accessToken, setAccessToken] = useState('');
   const [isLoading, setIsLoading] = useState(true); // Track loading state
-
+  const [creatorclicked, setCreatorclicked] = useState(false)
   useEffect(() => {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const code = urlSearchParams.get('code');
@@ -17,7 +17,7 @@ const Redirect = () => {
     axios.post("http://localhost:4000/tiktokaccesstoken", {
       code,
     })
-    .then((response) => {
+      .then((response) => {
         const parsedResponse = response.data; // Assuming JSON response
         setResponseData(parsedResponse);
         setAccessToken(parsedResponse.access_token);
@@ -35,13 +35,13 @@ const Redirect = () => {
       {responseData ? (
         <div className="text-center">
           <h3 className="text-3xl mb-4">Welcome</h3>
-          <TikTokCreatorInfo accessToken={accessToken}/>
-          
-          <button className="bg-razzmatazz text-white mt-2 py-2 px-4 rounded-lg shadow-lg hover:bg-splash transition-colors">Create</button>
+          {!creatorclicked && <TikTokCreatorInfo accessToken={accessToken} />}
+          {creatorclicked && <EditorPage accessToken={accessToken} />}
+          <button className="bg-razzmatazz text-white mt-2 py-2 px-4 rounded-lg shadow-lg hover:bg-splash transition-colors" onClick={() => setCreatorclicked(true)}>Create</button>
         </div>
-        ) : (
-        <p>Handling TikTok Authorization...</p>
-      )}
+      ) : (
+          <p>Handling TikTok Authorization...</p>
+        )}
     </div>
   );
 };
