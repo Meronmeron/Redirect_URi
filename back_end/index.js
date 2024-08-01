@@ -1,12 +1,37 @@
 const express = require("express");
 const querystring = require("querystring");
 const cors = require("cors");
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 const axios = require("axios");
 const app = express();
 app.use(cors());
-const allowedOrigins = ['http://localhost:3000', 'https://redirect-uri-tan.vercel.app'];
+// const allowedOrigins = ['http://localhost:3000', 'https://redirect-uri-tan.vercel.app'];
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl requests, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin starts with the allowed prefixes
+    if (origin.startsWith('http://localhost:3000') || origin.startsWith('https://redirect-uri-tan.vercel.app')) {
+      callback(null, true); // Allow the origin
+    } else {
+      callback(new Error('Not allowed by CORS')); // Block the origin
+    }
+  }
+};
 
-app.use(cors({ origin: allowedOrigins }))
+// Use the CORS middleware with the custom options
+app.use(cors(corsOptions));
+// app.use(cors({ origin: allowedOrigins }))
+const UPLOAD_FOLDER = 'uploads';
+
+const upload = multer({ dest: UPLOAD_FOLDER });
+
+if (!fs.existsSync(UPLOAD_FOLDER)) {
+    fs.mkdirSync(UPLOAD_FOLDER);
+}
 
 app.use(express.json());
 const session = require("express-session");
@@ -80,7 +105,115 @@ app.get("/oauth", (req, res) => {
         res.status(error.response.status || 500).json({ error: error.message });
     }
 });
+
+app.post('/api/upload', upload.fields([{ name: 'video' }, { name: 'creative' }]), (req, res) => {
+  const videoFile = req.files.video[0];
+  const creativeFile = req.files.creative[0];
+  const sliderValue = parseInt(req.body.position_value);
+  const horizontalValue = parseInt(req.body.horizontal_value);
+  const widthValue = parseInt(req.body.width_value);
+  const heightValue = parseInt(req.body.height_value);
+  const startTime = parseFloat(req.body.start_time || 0);
+  const endTime = parseFloat(req.body.end_time || 0);
+  const videoDimension = req.body.video_dimension;
+  const animationType = req.body.animation_type || 'none';
+  const animationDuration = parseFloat(req.body.animation_duration);
+
+  const videoPath = path.join(UPLOAD_FOLDER, videoFile.filename);
+  const creativePath = path.join(UPLOAD_FOLDER, creativeFile.filename);
+  const outputPath = path.join(UPLOAD_FOLDER, 'output.mp4');
+
+  const width = parseInt(videoDimension.split('x')[0]);
+  const height = parseInt(videoDimension.split('x')[1]);
+
+  // Call Python script for video processing
+  const { spawn } = require('child_process');
+  const process = spawn('python3', ['./process_video.py', videoPath, creativePath, sliderValue, horizontalValue, widthValue, heightValue, startTime, endTime, outputPath, animationDuration, animationType, width, height]);
   
+  process.stdout.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+    });
+    
+  process.stderr.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
+    
+  process.on('close', (code) => {
+      console.log(`child process exited with code ${code}`)
+      if (code === 0) {
+          res.download(outputPath, 'edited_video.mp4');
+      } else {
+          res.status(500).json({ error: 'Failed to process video' });
+      }
+  });
+});
+
+app.post('/api/post', upload.single('video_file'), async (req, res) => {
+  const videoFile = req.file;
+  const outputPath = path.join(UPLOAD_FOLDER, videoFile.filename);
+
+  const accessToken = req.headers.authorization;
+  if (!accessToken) {
+      return res.status(400).json({ error: 'No access token provided' });
+  }
+
+  try {
+      const videoSize = fs.statSync(outputPath).size;
+      const minChunkSize = 5 * 1024 * 1024; // 5 MB
+      const chunkSize = Math.min(minChunkSize, videoSize);
+      const totalChunkCount = Math.ceil(videoSize / chunkSize);
+
+      const uploadInitUrl = "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/";
+
+      const initResponse = await axios.post(uploadInitUrl, {
+          source_info: {
+              source: "FILE_UPLOAD",
+              video_size: videoSize,
+              chunk_size: chunkSize,
+              total_chunk_count: totalChunkCount
+          }
+      }, {
+          headers: {
+              'Authorization': accessToken
+          }
+      });
+
+      if (initResponse.status === 200) {
+          const uploadUrl = initResponse.data.data.upload_url;
+
+          const videoStream = fs.createReadStream(outputPath, { highWaterMark: chunkSize });
+          let chunkIndex = 0;
+
+          for await (const chunk of videoStream) {
+              const startByte = chunkIndex * chunkSize;
+              const endByte = startByte + chunk.length - 1;
+              const contentRange = `bytes ${startByte}-${endByte}/${videoSize}`;
+
+              const chunkResponse = await axios.put(uploadUrl, chunk, {
+                  headers: {
+                      'Content-Range': contentRange,
+                      'Content-Length': chunk.length.toString(),
+                      'Content-Type': 'video/mp4'
+                  }
+              });
+
+              if (![200, 201, 202].includes(chunkResponse.status)) {
+                  throw new Error(`Failed to upload chunk ${chunkIndex + 1}`);
+              }
+
+              chunkIndex++;
+          }
+
+          fs.unlinkSync(outputPath);
+          res.json({ message: 'Video uploaded successfully' });
+      } else {
+          throw new Error('Failed to initialize video upload');
+      }
+  } catch (error) {
+      res.status(error.response.status || 500).json({ error: error.message });
+  }
+});
+
 // window.location.href = `http://localhost:3000/redirect/?response=${encodeURIComponent(JSON.stringify(responseData))}`; 
 // res.redirect(`http://localhost:3000/redirect/?response=${encodeURIComponent(JSON.stringify(responseData))}`);
 
