@@ -1,5 +1,4 @@
 import React, { useContext,useState, useRef, useEffect } from 'react';
-// import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import '../index.css'
 const EditorPage = ({accessToken}) => {
@@ -93,9 +92,7 @@ const EditorPage = ({accessToken}) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      // const result = await response.json();
-      // const { output_path } = result;
-
+     
       const blob = await response.blob();
       setLoading(false);
       const url = URL.createObjectURL(blob);
