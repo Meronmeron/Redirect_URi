@@ -128,7 +128,6 @@ app.post('/api/upload', upload.fields([{ name: 'video' }, { name: 'creative' }])
   
   const ffmpeg = require('fluent-ffmpeg');
   const ffmpegPath = require('ffmpeg-static');
-  const path = require('path');
   
   ffmpeg.setFfmpegPath(ffmpegPath);
   
