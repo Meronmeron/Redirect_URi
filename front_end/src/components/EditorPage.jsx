@@ -86,7 +86,7 @@ const EditorPage = ({accessToken}) => {
     setLoading(true);
     const formData = new FormData(event.target);
     try {
-      const response = await fetch('https://redirect-ur.onrender.com/api/upload', {
+      const response = await fetch('https://redirect-ur.onrender.com/api/upload/', {
         method: 'POST',
         body: formData,
       });
