@@ -2,7 +2,6 @@ import React, { useContext,useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import '../index.css'
 const EditorPage = ({accessToken}) => {
-//   const { accessToken } = useContext(AuthContext);
   
   const [outputFilePath, setOutputFilePath] = useState('');
   const [videoFile, setVideoFile] = useState(null);
