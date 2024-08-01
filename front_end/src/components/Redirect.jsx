@@ -37,7 +37,7 @@ const Redirect = () => {
           <h3 className="text-3xl mb-4">Welcome</h3>
           {!creatorclicked && <TikTokCreatorInfo accessToken={accessToken} />}
           {creatorclicked && <EditorPage accessToken={accessToken} />}
-          <button className="bg-razzmatazz text-white mt-2 py-2 px-4 rounded-lg shadow-lg hover:bg-splash transition-colors" onClick={() => setCreatorclicked(true)}>Create</button>
+          <button className="bg-razzmatazz text-white mt-2 py-2 px-4 rounded-lg shadow-lg hover:bg-splash transition-colors" onClick={() => setCreatorclicked(!creatorclicked)}>{creatorclicked?'Back':'Create'}</button>
         </div>
       ) : (
           <p>Handling TikTok Authorization...</p>
