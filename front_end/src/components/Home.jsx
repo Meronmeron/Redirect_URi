@@ -8,7 +8,7 @@ const Home = () => {
 return (
     <div className="bg-black text-white min-h-screen flex flex-col justify-center items-center">
       <div className="text-center">
-        <button className="bg-razzmatazz text-white mt-2 py-2 px-4 rounded-lg shadow-lg hover:bg-splash transition-colors" onClick={request_token}>Tik tok</button>
+        <button className="bg-razzmatazz text-white mt-2 py-2 px-4 rounded-lg shadow-lg hover:bg-splash transition-colors" onClick={request_token}>Log in</button>
       </div>
     </div>
   );
