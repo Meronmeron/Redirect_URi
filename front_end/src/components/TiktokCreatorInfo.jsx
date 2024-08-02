@@ -7,7 +7,7 @@ const TikTokCreatorInfo = ({ accessToken }) => {
   useEffect(() => {
     const fetchCreatorInfo = async () => {
       console.log('infectch creator info',accessToken)
-      const url = 'https://redirect-ur.onrender.com/api/creator_info';
+      const url = 'http://localhost:3001/api/creator_info';
       const headers = {
         'Authorization': `Bearer ${accessToken}`
       };
