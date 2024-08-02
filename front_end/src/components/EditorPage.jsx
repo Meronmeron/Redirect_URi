@@ -86,7 +86,7 @@ const EditorPage = ({accessToken}) => {
     setLoading(true);
     const formData = new FormData(event.target);
     try {
-      const response = await fetch('https://redirect-ur.onrender.com/api/upload/', {
+      const response = await fetch('http://localhost:4000/api/upload/', {
         method: 'POST',
         body: formData,
       });
@@ -121,7 +121,7 @@ const EditorPage = ({accessToken}) => {
       console.error('Invalid dimensions:', e.target.value);
     }
   };
-// http://localhost:3001 
+//http://localhost:3001 
 //   const accessToken = "act.ZnvKhgbKHE2yfTfXL6bWnweXE0kbRDxdHHW0CuqCj1HITCXfOn2RtUWlikcI!4858.va"
   const handleVideoPost = async () => {
     try {
@@ -129,7 +129,7 @@ const EditorPage = ({accessToken}) => {
       const file = new File([outputFilePath], 'editedVideo.mp4', { type: 'video/mp4' });
       const formData = new FormData();
       formData.append('video_file', file);
-      const postResponse = await axios.post('https://redirect-ur.onrender.com/api/post', formData, {
+      const postResponse = await axios.post('http://localhost:4000/api/post', formData, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
