@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 const Home = () => {
   const request_token = async () => {
-    const response = await axios.get("http://192.168.1.153:4000/oauth");
+    const response = await axios.get("https://back-end-latest.onrender.com/oauth");
     window.location.href = `${response.data.url}`;
   };
 return (
