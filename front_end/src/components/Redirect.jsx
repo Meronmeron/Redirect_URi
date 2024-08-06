@@ -15,7 +15,7 @@ const Redirect = () => {
     const code = urlSearchParams.get('code');
 
     // Handle potential axios errors
-    axios.post("http://192.168.1.153:4000/tiktokaccesstoken", {
+    axios.post("https://back-end-latest.onrender.com/tiktokaccesstoken", {
       code,
     })
       .then((response) => {
