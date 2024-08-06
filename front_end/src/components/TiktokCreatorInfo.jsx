@@ -7,7 +7,7 @@ const TikTokCreatorInfo = ({ accessToken }) => {
   useEffect(() => {
     const fetchCreatorInfo = async () => {
       console.log('infectch creator info',accessToken)
-      const url = 'http://localhost:4000/api/creator_info';
+      const url = 'http://192.168.1.153:4000/api/creator_info';
       const headers = {
         'Authorization': `Bearer ${accessToken}`
       };
