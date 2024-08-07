@@ -1,0 +1,29 @@
+FROM docker.io/library/node:18
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and install Node.js dependencies
+COPY package*.json ./
+RUN npm install
+
+# Install Python and required packages
+RUN apt-get update && apt-get install -y python3-venv python3-pip
+
+# Create and activate a virtual environment
+RUN python3 -m venv /app/venv
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of your application code
+COPY . .
+
+# Expose the port the app runs on
+EXPOSE 4000
+
+# Start the Node.js application
+CMD ["node", "index.js"]

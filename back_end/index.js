@@ -1,30 +1,37 @@
 const express = require("express");
 const querystring = require("querystring");
-const cors = require("cors");
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const axios = require("axios");
 const app = express();
-app.use(cors());
-// const allowedOrigins = ['http://localhost:3000', 'https://redirect-uri-tan.vercel.app'];
+const cors = require('cors');
+
+const allowedOrigins = [
+  'https://example1.com',
+  'https://example2.net',
+  'http://localhost:3000' // For development
+];
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl requests, etc.)
-    if (!origin) return callback(null, true);
-    
-    // Check if the origin starts with the allowed prefixes
-    if (origin.startsWith('http://localhost:3000') || origin.startsWith('https://redirect-uri-tan.vercel.app')) {
-      callback(null, true); // Allow the origin
-    } else {
-      callback(new Error('Not allowed by CORS')); // Block the origin
+    if (origin === null || origin === undefined || origin === '') {
+      return callback(null, true);
     }
-  }
+
+    const matchedOrigin = allowedOrigins.find(allowedOrigin => origin.startsWith(allowedOrigin));
+    if (matchedOrigin) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
-// Use the CORS middleware with the custom options
 app.use(cors(corsOptions));
-// app.use(cors({ origin: allowedOrigins }))
+
 const UPLOAD_FOLDER = 'uploads';
 
 const upload = multer({ dest: UPLOAD_FOLDER });
@@ -126,108 +133,108 @@ app.post('/api/upload', upload.fields([{ name: 'video' }, { name: 'creative' }])
   const width = parseInt(videoDimension.split('x')[0]);
   const height = parseInt(videoDimension.split('x')[1]);
   
-  const ffmpeg = require('fluent-ffmpeg');
-  const ffmpegPath = require('ffmpeg-static');
+//   const ffmpeg = require('fluent-ffmpeg');
+//   const ffmpegPath = require('ffmpeg-static');
   
-  ffmpeg.setFfmpegPath(ffmpegPath);
+//   ffmpeg.setFfmpegPath(ffmpegPath);
   
-  processVideo({
-    videoPath: videoFile,
-    creativePath: creativeFile,
-    sliderValue: sliderValue,
-    horizontalValue: horizontalValue,
-    widthValue: widthValue,
-    heightValue: heightValue,
-    startTime: startTime,
-    endTime: endTime,
-    outputPath: outputPath,
-    animationDuration: animationDuration,
-    animationType: animationType,
-    width: width,
-    height: height
-});
+//   processVideo({
+//     videoPath: videoFile,
+//     creativePath: creativeFile,
+//     sliderValue: sliderValue,
+//     horizontalValue: horizontalValue,
+//     widthValue: widthValue,
+//     heightValue: heightValue,
+//     startTime: startTime,
+//     endTime: endTime,
+//     outputPath: outputPath,
+//     animationDuration: animationDuration,
+//     animationType: animationType,
+//     width: width,
+//     height: height
+// });
 
-  function processVideo({
-      videoPath,
-      creativePath,
-      sliderValue,
-      horizontalValue,
-      widthValue,
-      heightValue,
-      startTime,
-      endTime,
-      outputPath,
-      animationDuration,
-      animationType,
-      width,
-      height
-  }) {
-      // Convert slider and horizontal values to percentage
-      const y = (sliderValue / 100) * (height - heightValue);
-      const x = (horizontalValue / 100) * (width - widthValue);
+//   function processVideo({
+//       videoPath,
+//       creativePath,
+//       sliderValue,
+//       horizontalValue,
+//       widthValue,
+//       heightValue,
+//       startTime,
+//       endTime,
+//       outputPath,
+//       animationDuration,
+//       animationType,
+//       width,
+//       height
+//   }) {
+//       // Convert slider and horizontal values to percentage
+//       const y = (sliderValue / 100) * (height - heightValue);
+//       const x = (horizontalValue / 100) * (width - widthValue);
   
-      // Define filters for creative
-      let filters = [];
-      filters.push(`scale=${widthValue}:${heightValue}`);
+//       // Define filters for creative
+//       let filters = [];
+//       filters.push(`scale=${widthValue}:${heightValue}`);
   
-      if (animationType === 'fadein') {
-          filters.push(`fade=t=in:st=${startTime}:d=${animationDuration}`);
-      } else if (animationType === 'fadeout') {
-          filters.push(`fade=t=out:st=${endTime - animationDuration}:d=${animationDuration}`);
-      } else if (animationType === 'slide') {
-          filters.push(`setpts=PTS-STARTPTS+${startTime}/TB`);
-          filters.push(`crop=${width}:${height}:${x}:${y}`);
-      }
+//       if (animationType === 'fadein') {
+//           filters.push(`fade=t=in:st=${startTime}:d=${animationDuration}`);
+//       } else if (animationType === 'fadeout') {
+//           filters.push(`fade=t=out:st=${endTime - animationDuration}:d=${animationDuration}`);
+//       } else if (animationType === 'slide') {
+//           filters.push(`setpts=PTS-STARTPTS+${startTime}/TB`);
+//           filters.push(`crop=${width}:${height}:${x}:${y}`);
+//       }
   
-      ffmpeg()
-          .input(videoPath)
-          .input(creativePath)
-          .complexFilter([
-              {
-                  filter: 'scale',
-                  options: { w: width, h: height }
-              },
-              {
-                  filter: 'overlay',
-                  options: {
-                      x: x,
-                      y: y,
-                      enable: `between(t,${startTime},${endTime || 'main_duration'})`
-                  }
-              }
-          ])
-          .output(outputPath)
-          .on('end', () => {
-              console.log('Processing finished successfully');
-          })
-          .on('error', (err) => {
-              console.error('An error occurred:', err);
-          })
-          .run();
-  }
+//       ffmpeg()
+//           .input(videoPath)
+//           .input(creativePath)
+//           .complexFilter([
+//               {
+//                   filter: 'scale',
+//                   options: { w: width, h: height }
+//               },
+//               {
+//                   filter: 'overlay',
+//                   options: {
+//                       x: x,
+//                       y: y,
+//                       enable: `between(t,${startTime},${endTime || 'main_duration'})`
+//                   }
+//               }
+//           ])
+//           .output(outputPath)
+//           .on('end', () => {
+//               console.log('Processing finished successfully');
+//           })
+//           .on('error', (err) => {
+//               console.error('An error occurred:', err);
+//           })
+//           .run();
+//   }
   
   // Example usage
  
   // Call Python script for video processing
-  // const { spawn } = require('child_process');
-  // const process = spawn('python3', ['./process_video.py', videoPath, creativePath, sliderValue, horizontalValue, widthValue, heightValue, startTime, endTime, outputPath, animationDuration, animationType, width, height]);
+  const { spawn } = require('child_process');
+  const process = spawn('python3', ['./process_video.py', videoPath, creativePath, sliderValue, horizontalValue, widthValue, heightValue, startTime, endTime, outputPath, animationDuration, animationType, width, height]);
   
-  // process.stdout.on('data', (data) => {
-  //     console.log(`stdout: ${data}`);
-  //   });
+  process.stdout.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+    });
     
-  // process.stderr.on('data', (data) => {
-  //     console.error(`stderr: ${data}`);
-  //   });
+  process.stderr.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
     
-  // process.on('close', (code) => {
-  //     console.log(`child process exited with code ${code}`)
-  //     if (code === 0) {
-  //         res.download(outputPath, 'edited_video.mp4');
-  //     } else {
-  //         res.status(500).json({ error: 'Failed to process video' });
-  //     }
-  // });
+  process.on('close', (code) => {
+      console.log(`child process exited with code ${code}`)
+      if (code === 0) {
+          res.download(outputPath, 'edited_video.mp4');
+      } else {
+          res.status(500).json({ error: 'Failed to process video' });
+      }
+  });
 });
 
 app.post('/api/post', upload.single('video_file'), async (req, res) => {
