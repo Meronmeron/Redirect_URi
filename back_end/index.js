@@ -8,9 +8,9 @@ const app = express();
 const cors = require('cors');
 
 const allowedOrigins = [
-  'https://example1.com',
-  'https://example2.net',
-  'http://localhost:3000' // For development
+  'https://redirect-uri-tan.vercel.app', // Replace with your Vercel domain
+  'http://localhost:3000', // Development origin
+  'http://192.168.1.153:3000'
 ];
 
 const corsOptions = {
