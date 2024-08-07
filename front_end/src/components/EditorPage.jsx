@@ -86,7 +86,7 @@ const EditorPage = ({accessToken}) => {
     setLoading(true);
     const formData = new FormData(event.target);
     try {
-      const response = await fetch('http://192.168.1.153:4000/api/upload/', {
+      const response = await fetch('https://back-end-latest.onrender.com/api/upload/', {
         method: 'POST',
         body: formData,
       });
@@ -129,7 +129,7 @@ const EditorPage = ({accessToken}) => {
       const file = new File([outputFilePath], 'editedVideo.mp4', { type: 'video/mp4' });
       const formData = new FormData();
       formData.append('video_file', file);
-      const postResponse = await axios.post('http://192.168.1.153:4000/api/post', formData, {
+      const postResponse = await axios.post('https://back-end-latest.onrender.com/api/post', formData, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
