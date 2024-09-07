@@ -10,7 +10,8 @@ const cors = require('cors');
 const allowedOrigins = [
   'https://redirect-uri-tan.vercel.app', // Replace with your Vercel domain
   'http://localhost:3000', // Development origin
-  'http://192.168.1.153:3000'
+  'http://192.168.1.153:3000',
+  'http://localhost:5173'
 ];
 
 const corsOptions = {
@@ -31,6 +32,39 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+// Mock Redirect URI handler
+// app.get('/auth/tiktok/callback', async (req, res) => {
+//   const authorizationCode = req.query.code; // Get authorization code from query params
+//   const clientId =  "aw0h2vs3s39ad7dk";
+//   const clientSecret = "Gd5cLdFaAsv0pzQgidmWWkkeQHxoyBZt";
+//   const redirectUri = 'https://redirect-uri-tan.vercel.app/redirect'; // Your Redirect URI
+
+//   try {
+//     // Exchange authorization code for access token
+//     const tokenResponse = await axios.post('https://open-api.tiktok.com/oauth/access_token', {
+//       client_key: clientId,
+//       client_secret: clientSecret,
+//       code: authorizationCode,
+//       grant_type: 'authorization_code',
+//       redirect_uri: redirectUri
+//     });
+
+//     const accessToken = tokenResponse.data.data.access_token;
+
+//     // Redirect the user to the main app with the access token as a query parameter
+//     res.redirect(`http://localhost:5173?token=${accessToken}`);
+
+//   } catch (error) {
+//     console.error('Error exchanging code for access token:', error.response?.data || error.message);
+//     res.status(500).send('Authorization Failed');
+//   }
+// });
+
+// // Start the server
+// app.listen(3000, () => {
+//   console.log('Server running on http://localhost:3000');
+// });
+
 
 const UPLOAD_FOLDER = 'uploads';
 
@@ -86,7 +120,10 @@ app.get("/oauth", (req, res) => {
   
       // Log and send the response data back to the frontend
       console.log("response>>>>>>>", response.data);
-      res.json(response.data); // Send JSON response back to the frontend
+      res.json(response.data); 
+      // res.redirect(`http://localhost:5173?token=${accessToken}`);
+
+// Send JSON response back to the frontend
     } catch (error) {
       console.error("Error during callback:", error.message);
       res.status(500).json({ error: "An error occurred during the login process." });
@@ -133,88 +170,6 @@ app.post('/api/upload', upload.fields([{ name: 'video' }, { name: 'creative' }])
   const width = parseInt(videoDimension.split('x')[0]);
   const height = parseInt(videoDimension.split('x')[1]);
   
-//   const ffmpeg = require('fluent-ffmpeg');
-//   const ffmpegPath = require('ffmpeg-static');
-  
-//   ffmpeg.setFfmpegPath(ffmpegPath);
-  
-//   processVideo({
-//     videoPath: videoFile,
-//     creativePath: creativeFile,
-//     sliderValue: sliderValue,
-//     horizontalValue: horizontalValue,
-//     widthValue: widthValue,
-//     heightValue: heightValue,
-//     startTime: startTime,
-//     endTime: endTime,
-//     outputPath: outputPath,
-//     animationDuration: animationDuration,
-//     animationType: animationType,
-//     width: width,
-//     height: height
-// });
-
-//   function processVideo({
-//       videoPath,
-//       creativePath,
-//       sliderValue,
-//       horizontalValue,
-//       widthValue,
-//       heightValue,
-//       startTime,
-//       endTime,
-//       outputPath,
-//       animationDuration,
-//       animationType,
-//       width,
-//       height
-//   }) {
-//       // Convert slider and horizontal values to percentage
-//       const y = (sliderValue / 100) * (height - heightValue);
-//       const x = (horizontalValue / 100) * (width - widthValue);
-  
-//       // Define filters for creative
-//       let filters = [];
-//       filters.push(`scale=${widthValue}:${heightValue}`);
-  
-//       if (animationType === 'fadein') {
-//           filters.push(`fade=t=in:st=${startTime}:d=${animationDuration}`);
-//       } else if (animationType === 'fadeout') {
-//           filters.push(`fade=t=out:st=${endTime - animationDuration}:d=${animationDuration}`);
-//       } else if (animationType === 'slide') {
-//           filters.push(`setpts=PTS-STARTPTS+${startTime}/TB`);
-//           filters.push(`crop=${width}:${height}:${x}:${y}`);
-//       }
-  
-//       ffmpeg()
-//           .input(videoPath)
-//           .input(creativePath)
-//           .complexFilter([
-//               {
-//                   filter: 'scale',
-//                   options: { w: width, h: height }
-//               },
-//               {
-//                   filter: 'overlay',
-//                   options: {
-//                       x: x,
-//                       y: y,
-//                       enable: `between(t,${startTime},${endTime || 'main_duration'})`
-//                   }
-//               }
-//           ])
-//           .output(outputPath)
-//           .on('end', () => {
-//               console.log('Processing finished successfully');
-//           })
-//           .on('error', (err) => {
-//               console.error('An error occurred:', err);
-//           })
-//           .run();
-//   }
-  
-  // Example usage
- 
   // Call Python script for video processing
   const { spawn } = require('child_process');
   const process = spawn('python3', ['./process_video.py', videoPath, creativePath, sliderValue, horizontalValue, widthValue, heightValue, startTime, endTime, outputPath, animationDuration, animationType, width, height]);
@@ -303,114 +258,6 @@ app.post('/api/post', upload.single('video_file'), async (req, res) => {
   }
 });
 
-// window.location.href = `http://localhost:3000/redirect/?response=${encodeURIComponent(JSON.stringify(responseData))}`; 
-// res.redirect(`http://localhost:3000/redirect/?response=${encodeURIComponent(JSON.stringify(responseData))}`);
-
-
-// const REDIRECT_URI = 'https://redirect-uri-tan.vercel.app/redirect';
-// const PORT = 4000
-// app.get('/oauth/callback', (req, res) => {
-//     const csrfState = Math.random().toString(36).substring(2);
-//     res.cookie("csrfState", csrfState, { maxAge: 60000 });
-
-//     const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=aw0h2vs3s39ad7dk&scope=user.info.basic,video.upload,video.publish&response_type=code&redirect_uri='https://redirect-uri-tan.vercel.app/redirect'&state=${csrfState}`;
-    
-
-//     res.redirect(authUrl);  // Redirect the user to the TikTok authorization page
-// });
-
-// app.get('/oauth/redirect', async (req, res) => {
-//     const authorizationCode = req.query.code;
-
-//     if (!authorizationCode) {
-//         return res.redirect(`http://localhost:3000/redirect/?response=${encodeURIComponent(JSON.stringify({ error: 'Authorization code not found in the URL.' }))}`);
-//     }
-
-//     try {
-//         const response = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', new URLSearchParams({
-//             client_key: 'aw0h2vs3s39ad7dk',
-//             client_secret: 'Gd5cLdFaAsv0pzQgidmWWkkeQHxoyBZt',
-//             code: authorizationCode,
-//             grant_type: 'authorization_code',
-//             redirect_uri: REDIRECT_URI,
-//         }).toString(), {
-//             headers: {
-//                 'Content-Type': 'application/x-www-form-urlencoded',
-//             },
-//         },{timeout:1000});
-
-//         const responseData = response.data;
-
-//         // Redirect to React app with the response data
-//         res.redirect(`http://localhost:3000/redirect/?response=${encodeURIComponent(JSON.stringify(responseData))}`);
-//     } catch (error) {
-//         console.error('Error during token exchange:', error);
-//         const responseData = { error: 'Failed to exchange token' };
-//         res.redirect(`http://localhost:3000/redirect/?response=${encodeURIComponent(JSON.stringify(responseData))}`);
-//     }
-// });
-// app.listen(PORT, () => {
-//   console.log(`Server running on http://localhost:${PORT}`);
-// });
-
-
-
-
-
- // Constants
-// const CLIENT_KEY = 'YOUR_CLIENT_KEY';
-// const CLIENT_SECRET = 'YOUR_CLIENT_SECRET';
-// const REDIRECT_URI = 'YOUR_REDIRECT_URI';
-
-// // Get the authorization code from the URL
-// const urlParams = new URLSearchParams(window.location.search);
-// const authorizationCode = urlParams.get('code');
-
-// (async () => {
-//     let responseData;
-
-//     if (authorizationCode) {
-//         // Prepare the POST request data
-//         const postData = new URLSearchParams({
-//             client_key: CLIENT_KEY,
-//             client_secret: CLIENT_SECRET,
-//             code: authorizationCode,
-//             grant_type: 'authorization_code',
-//             redirect_uri: REDIRECT_URI,
-//         });
-
-//         try {
-//             // Make the POST request using fetch
-//             const response = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/x-www-form-urlencoded',
-//                 },
-//                 body: postData.toString(),
-//             });
-
-//             if (!response.ok) {
-//                 throw new Error(`HTTP error! status: ${response.status}`);
-//             }
-
-//             // Decode the JSON response
-//             responseData = await response.json();
-//         } catch (error) {
-//             // Handle fetch errors
-//             responseData = {
-//                 error: 'Fetch error: ' + error.message,
-//             };
-//         }
-//     } else {
-//         // Handle case where authorization code is not found
-//         responseData = {
-//             error: 'Authorization code not found in the URL.',
-//         };
-//     }
-
-//     // Redirect back to React app with response JSON
-//     window.location.href = `http://localhost:3000/redirect/?response=${encodeURIComponent(JSON.stringify(responseData))}`;
-// })();
 
 app.listen(4000, ()=>{console.log("server is running on port 4000")})
   
