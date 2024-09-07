@@ -3,7 +3,7 @@ import axios from "axios";
 
 const Redirect = () => {
   const [accessToken, setAccessToken] = useState('');
-  const [isLoading, setIsLoading] = useState(true); // Track loading state
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const urlSearchParams = new URLSearchParams(window.location.search);
@@ -14,18 +14,17 @@ const Redirect = () => {
       code,
     })
       .then((response) => {
-        const parsedResponse = response.data; // Assuming JSON response
+        const parsedResponse = response.data;
         setAccessToken(parsedResponse.access_token);
-        console.log(parsedResponse.access_token);
-        localStorage.setItem('TiktokToken', parsedResponse.access_token);
-        setIsLoading(false); // Set loading to false on successful response
+        setIsLoading(false);
 
-        // Redirect to dashboard after setting token
-        // window.location.href = 'http://localhost:8000/dashboard';
+        // Redirect to localhost with the access token in the URL
+        const redirectUrl = `http://localhost:8000/login?access_token=${parsedResponse.access_token}`;
+        window.location.href = redirectUrl;
       })
       .catch((error) => {
         console.error("Error fetching access token:", error);
-        setIsLoading(false); // Set loading to false on error
+        setIsLoading(false);
       });
   }, []);
 
