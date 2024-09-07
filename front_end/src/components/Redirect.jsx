@@ -21,7 +21,7 @@ const Redirect = () => {
         setIsLoading(false); // Set loading to false on successful response
 
         // Redirect to dashboard after setting token
-        window.location.href = 'http://localhost:8000/dashboard';
+        // window.location.href = 'http://localhost:8000/dashboard';
       })
       .catch((error) => {
         console.error("Error fetching access token:", error);
