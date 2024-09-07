@@ -11,7 +11,8 @@ const allowedOrigins = [
   'https://redirect-uri-tan.vercel.app', // Replace with your Vercel domain
   'http://localhost:3000', // Development origin
   'http://192.168.1.153:3000',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'http://localhost:8000'
 ];
 
 const corsOptions = {
