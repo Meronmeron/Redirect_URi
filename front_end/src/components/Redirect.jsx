@@ -29,7 +29,7 @@ const Redirect = () => {
         setProgress(100);
         setIsLoading(false);
         // Redirect to localhost with the access token in the URL
-        const redirectUrl = `http://localhost:3000/platformAuth/?access_token=${parsedResponse.access_token}`;
+        const redirectUrl = `http://localhost:3000/platformAuth/?data=${parsedResponse}`;
         window.location.href = redirectUrl;
       })
       .catch((error) => {
